@@ -36,3 +36,33 @@ class Tablero:
 
         # Barra de fichas capturadas pendientes de reingreso
         self.barra = { self.BLANCO: 0, self.NEGRO: 0 }
+
+def obtener_punto(self, indice: int) -> int:
+        """
+        Devuelve el número de fichas en el punto indicado.
+        Lanza TableroError si el índice está fuera de rango.
+        """
+        if not (0 <= indice < self.PUNTOS_CONTADOS):
+            raise TableroError(f"Índice de punto fuera de rango: {indice}")
+        return self.puntos[indice]
+
+def punto_disponible(self, indice: int, jugador: int) -> bool:
+        """
+        Comprueba si el jugador puede mover a ese punto:
+        - Vacío (0 fichas)
+        - Sólo fichas propias (valor * jugador > 0)
+        - Exactamente 1 ficha rival (captura posible)
+        
+        abs(ocupacion) devuelve el valor absoluto de ocupacion.
+        """
+        ocupacion = self.obtener_punto(indice)
+        # punto vacío
+        if ocupacion == 0:
+            return True
+        # fichas propias
+        if ocupacion * jugador > 0:
+            return True
+        # captura: exactamente una ficha enemiga
+        if abs(ocupacion) == 1:
+            return True
+        return False
