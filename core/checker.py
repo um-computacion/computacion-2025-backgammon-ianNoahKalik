@@ -4,7 +4,7 @@ class Ficha:
     Puede pertenecer al jugador blanco (1) o negro (-1).
     """
 
-    def _init_(self, color: int):
+    def __init__(self, color: int):
         """
         color: 1 para blanco, -1 para negro
         """
@@ -33,7 +33,7 @@ class Ficha:
         """Retorna True si la ficha está capturada."""
         return self.capturada
 
-    def _str_(self):
+    def __str__(self):
         estado = "Capturada" if self.capturada else "Activa"
         color_str = "Blanca" if self.color == 1 else "Negra"
         return f"Ficha {color_str} ({estado})"
