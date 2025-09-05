@@ -1,5 +1,4 @@
-from dice import Dado
-
+from core.dice import Dado
 class Jugador:
     """
     Representa a un jugador de Backgammon.

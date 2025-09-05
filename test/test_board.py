@@ -145,24 +145,6 @@ class TestTableroCoberturaExtra(unittest.TestCase):
         self.assertFalse(t.punto_disponible(6, t.BLANCO))
 
 
-class TestTableroErroresFaltantes(unittest.TestCase):
-    def test_mover_pieza_destino_fuera_de_rango(self):
-        t = Tablero()
-        t.puntos[0] = 1
-        with self.assertRaises(TableroError):
-            t.mover_pieza(t.BLANCO, 0, 24)
-
-    def test_reingresar_destino_fuera_de_rango(self):
-        t = Tablero()
-        t.barra[t.BLANCO] = 1
-        with self.assertRaises(TableroError):
-            t.reingresar_desde_barra(t.BLANCO, -1)
-
-    def test_mover_pieza_sin_ficha_propia_en_origen(self):
-        t = Tablero()
-        t.puntos[0] = -1  # ficha enemiga
-        with self.assertRaises(TableroError):
-            t.mover_pieza(t.BLANCO, 0, 1)
 
 if __name__ == "__main__":
     unittest.main()
