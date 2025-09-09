@@ -28,7 +28,7 @@ class Tablero:
 
         self.barra = { self.BLANCO: 0, self.NEGRO: 0 }
         self.borne_off = { self.BLANCO: 0, self.NEGRO: 0 }
-
+        self.fuera = self.borne_off
     def _validar_jugador(self, jugador: int):
         if jugador not in (self.BLANCO, self.NEGRO):
             raise TableroError("Jugador inválido")
