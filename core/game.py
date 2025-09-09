@@ -1,5 +1,3 @@
-# core/game.py
-
 from core.board import Tablero
 from core.player import Jugador
 from core.dice import Dado
@@ -17,3 +15,43 @@ class JuegoBackgammon:
         self.dado1 = Dado()
         self.dado2 = Dado()
         self.turno_actual = self.jugador_blanco
+
+    def lanzar_dados(self):
+        self.dado1.lanzar()
+        self.dado2.lanzar()
+        return self.dado1.valor, self.dado2.valor
+
+    def cambiar_turno(self):
+        self.turno_actual = (
+            self.jugador_negro if self.turno_actual == self.jugador_blanco
+            else self.jugador_blanco
+        )
+
+    def obtener_jugador_actual(self):
+        return self.turno_actual
+
+    def jugar_turno(self):
+        jugador = self.obtener_jugador_actual()
+        dado1, dado2 = self.lanzar_dados()
+        print(f"{jugador.nombre} lanzó los dados: {dado1} y {dado2}")
+        
+        # Acá podrías integrar lógica de movimiento, reingreso, etc.
+        # Por ejemplo:
+        # self.tablero.mover_pieza(jugador.color, origen, destino)
+
+        self.cambiar_turno()
+
+    def juego_terminado(self):
+        return (
+            self.tablero.obtener_fuera(self.jugador_blanco.color) == 15 or
+            self.tablero.obtener_fuera(self.jugador_negro.color) == 15
+        )
+
+    def simular_partida(self):
+        while not self.juego_terminado():
+            self.jugar_turno()
+        ganador = (
+            self.jugador_blanco if self.tablero.obtener_fuera(self.jugador_blanco.color) == 15
+            else self.jugador_negro
+        )
+        print(f"¡{ganador.nombre} ha ganado la partida!")
