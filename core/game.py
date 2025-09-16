@@ -55,3 +55,19 @@ class JuegoBackgammon:
             else self.jugador_negro
         )
         print(f"¡{ganador.nombre} ha ganado la partida!")
+
+    def obtener_ganador(self):
+        if self.tablero.obtener_fuera(self.jugador_blanco.color) == 15:
+            return self.jugador_blanco
+        elif self.tablero.obtener_fuera(self.jugador_negro.color) == 15:
+            return self.jugador_negro
+        return None
+    
+    def reiniciar_partida(self):
+        self.tablero.reset()
+        for jugador in [self.jugador_blanco, self.jugador_negro]:
+            jugador.fichas_capturadas = 0
+            jugador.fichas_salidas = 0
+            jugador.fichas_en_tablero = 15
+            jugador.movimientos_disponibles = []
+        self.turno_actual = self.jugador_blanco
