@@ -33,11 +33,33 @@ class JuegoBackgammon:
     def jugar_turno(self):
         jugador = self.obtener_jugador_actual()
         dado1, dado2 = self.lanzar_dados()
+
         print(f"{jugador.nombre} lanzó los dados: {dado1} y {dado2}")
-        
-        # Acá podrías integrar lógica de movimiento, reingreso, etc.
-        # Por ejemplo:
-        # self.tablero.mover_pieza(jugador.color, origen, destino)
+
+        movimientos = [dado1, dado2] if dado1 != dado2 else [dado1] * 4
+        jugador.movimientos_disponibles = movimientos
+
+        for movimiento in movimientos:
+            if self.tablero.hay_en_barra(jugador.color):
+                destino = self.calcular_destino_reingreso(jugador.color, movimiento)
+                try:
+                    self.tablero.reingresar_desde_barra(jugador.color, destino)
+                    print(f"{jugador.nombre} reingresó una ficha desde la barra al punto {destino}")
+                except Exception as e:
+                    print(f"No se pudo reingresar: {e}")
+                    continue
+            else:
+                origen, destino = self.calcular_movimiento(jugador.color, movimiento)
+                try:
+                    self.tablero.mover_pieza(jugador.color, origen, destino)
+                    print(f"{jugador.nombre} movió ficha de {origen} a {destino}")
+                except Exception as e:
+                    print(f"No se pudo mover ficha: {e}")
+                    continue
+
+            if self.puede_bornear(jugador.color):
+                self.tablero.agregar_a_fuera(jugador.color)
+                jugador.sacar_ficha()
 
         self.cambiar_turno()
 
@@ -71,3 +93,22 @@ class JuegoBackgammon:
             jugador.fichas_en_tablero = 15
             jugador.movimientos_disponibles = []
         self.turno_actual = self.jugador_blanco
+
+    def calcular_destino_reingreso(self, color, movimiento):
+        return movimiento - 1 if color == Tablero.BLANCO else Tablero.TOTAL_PUNTOS - movimiento
+
+    def calcular_movimiento(self, color, movimiento):
+        # Movimiento ficticio: busca la primera ficha del jugador y la mueve
+        puntos = range(Tablero.TOTAL_PUNTOS) if color == Tablero.BLANCO else reversed(range(Tablero.TOTAL_PUNTOS))
+        for origen in puntos:
+            if self.tablero.obtener_punto(origen) * color > 0:
+                destino = origen + movimiento if color == Tablero.BLANCO else origen - movimiento
+                if 0 <= destino < Tablero.TOTAL_PUNTOS:
+                    return origen, destino
+        raise Exception("No se encontró movimiento válido")
+
+    def puede_bornear(self, color):
+        # Simulación: si el jugador tiene fichas en el punto final, puede bornear
+        extremos = range(18, 24) if color == Tablero.BLANCO else range(0, 6)
+        total = sum(abs(self.tablero.obtener_punto(i)) for i in extremos if self.tablero.obtener_punto(i) * color > 0)
+        return total > 0
