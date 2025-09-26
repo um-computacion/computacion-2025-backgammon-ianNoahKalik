@@ -69,5 +69,44 @@ class TestJuegoBackgammon(unittest.TestCase):
         self.assertEqual(self.juego.turno_actual, self.juego.jugador_blanco)
         self.assertEqual(self.juego.tablero.obtener_fuera(self.juego.jugador_blanco.color), 0)        
 
+    def test_movimiento_basico(self):
+        # Colocamos una ficha blanca en el punto 0
+        self.juego.tablero.puntos[0] = 1  # 1 ficha blanca
+        self.juego.jugador_blanco.movimientos_disponibles = [3]
+        origen, destino = self.juego.calcular_movimiento(self.juego.jugador_blanco.color, 3)
+        self.assertEqual(origen, 0)
+        self.assertEqual(destino, 3)
+
+    def test_reingreso_desde_barra(self):
+        self.juego.tablero.barra[self.juego.jugador_blanco.color] = 1
+        destino = self.juego.calcular_destino_reingreso(self.juego.jugador_blanco.color, 4)
+        self.assertEqual(destino, 3)
+
+    def test_puede_bornear_true(self):
+        # Colocamos fichas blancas en zona de borneo
+        for i in range(18, 24):
+            self.juego.tablero.puntos[i] = 1
+        self.assertTrue(self.juego.puede_bornear(self.juego.jugador_blanco.color))
+
+    def test_puede_bornear_false(self):
+        for i in range(18, 24):
+            self.juego.tablero.puntos[i] = 0
+        self.assertFalse(self.juego.puede_bornear(self.juego.jugador_blanco.color)) 
+
+    
+    def test_turno_con_dobles(self):
+        # Aseguramos que haya fichas blancas en el tablero
+        self.juego.tablero.puntos[0] = 1  # 1 ficha blanca en punto 0
+
+        # Reemplazamos los métodos lanzar() de los dados por funciones que devuelven 5
+        self.juego.dado1.valor = 5
+        self.juego.dado2.valor = 5
+        self.juego.lanzar_dados = lambda: (5, 5)
+
+        self.juego.jugar_turno()
+
+        movimientos = self.juego.jugador_blanco.movimientos_disponibles
+        self.assertEqual(movimientos, [5, 5, 5, 5])
+
 if __name__ == "__main__":
     unittest.main()
