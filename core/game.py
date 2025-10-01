@@ -112,3 +112,9 @@ class JuegoBackgammon:
         extremos = range(18, 24) if color == Tablero.BLANCO else range(0, 6)
         total = sum(abs(self.tablero.obtener_punto(i)) for i in extremos if self.tablero.obtener_punto(i) * color > 0)
         return total > 0
+    
+
+
+if __name__ == "__main__":
+    juego = JuegoBackgammon("Ian", "Bot")
+    juego.simular_partida()
