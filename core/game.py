@@ -114,7 +114,48 @@ class JuegoBackgammon:
         return total > 0
     
 
+    def jugar_partida_interactiva(self):
+        while not self.juego_terminado():
+            jugador = self.obtener_jugador_actual()
+            print(f"\nTurno de {jugador.nombre} ({'Blanco' if jugador.color == 0 else 'Negro'})")
+            input("Presioná Enter para lanzar los dados...")
+            dado1, dado2 = self.lanzar_dados()
+            print(f"{jugador.nombre} lanzó: {dado1} y {dado2}")
+
+            movimientos = [dado1, dado2] if dado1 != dado2 else [dado1] * 4
+            jugador.movimientos_disponibles = movimientos
+
+            for movimiento in movimientos:
+                print(f"\nMovimiento disponible: {movimiento}")
+                print(f"Tablero actual: {self.tablero.puntos}")
+                if self.tablero.hay_en_barra(jugador.color):
+                    destino = int(input("Tenés fichas en la barra. Elegí destino para reingresar: "))
+                    try:
+                        self.tablero.reingresar_desde_barra(jugador.color, destino)
+                        print(f"{jugador.nombre} reingresó una ficha al punto {destino}")
+                    except Exception as e:
+                        print(f"Error al reingresar: {e}")
+                    continue
+
+                origen = int(input("Elegí punto de origen: "))
+                destino = int(input("Elegí punto de destino: "))
+                try:
+                    self.tablero.mover_pieza(jugador.color, origen, destino)
+                    print(f"{jugador.nombre} movió ficha de {origen} a {destino}")
+                except Exception as e:
+                    print(f"Movimiento inválido: {e}")
+
+                if self.puede_bornear(jugador.color):
+                    self.tablero.agregar_a_fuera(jugador.color)
+                    jugador.sacar_ficha()
+
+            self.cambiar_turno()
+
+        ganador = self.obtener_ganador()
+        print(f"\n¡{ganador.nombre} ha ganado la partida!")
+
+
 
 if __name__ == "__main__":
-    juego = JuegoBackgammon("Ian", "Bot")
-    juego.simular_partida()
+    juego = JuegoBackgammon("Ian", "Noah")
+    juego.jugar_partida_interactiva()
