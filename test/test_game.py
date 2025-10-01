@@ -108,5 +108,101 @@ class TestJuegoBackgammon(unittest.TestCase):
         movimientos = self.juego.jugador_blanco.movimientos_disponibles
         self.assertEqual(movimientos, [5, 5, 5, 5])
 
+
+    def test_calcular_movimiento_blanco(self):
+        self.juego.tablero.puntos[0] = 1  # ficha blanca
+        origen, destino = self.juego.calcular_movimiento(Tablero.BLANCO, 3)
+        self.assertEqual(origen, 0)
+        self.assertEqual(destino, 3)
+
+    def test_calcular_movimiento_negro(self):
+        self.juego.tablero.puntos[23] = -1  # ficha negra
+        origen, destino = self.juego.calcular_movimiento(Tablero.NEGRO, 4)
+        self.assertEqual(origen, 23)
+        self.assertEqual(destino, 19)
+
+    def test_calcular_movimiento_sin_fichas(self):
+        for i in range(Tablero.TOTAL_PUNTOS):
+            self.juego.tablero.puntos[i] = 0
+        with self.assertRaises(Exception):
+            self.juego.calcular_movimiento(Tablero.BLANCO, 2)
+
+    def test_calcular_destino_reingreso_blanco(self):
+        destino = self.juego.calcular_destino_reingreso(Tablero.BLANCO, 5)
+        self.assertEqual(destino, 4)
+
+    def test_calcular_destino_reingreso_negro(self):
+        destino = self.juego.calcular_destino_reingreso(Tablero.NEGRO, 2)
+        self.assertEqual(destino, 22)
+
+    def test_puede_bornear_true_blanco(self):
+        self.juego.tablero.puntos[18] = 1
+        self.assertTrue(self.juego.puede_bornear(Tablero.BLANCO))
+
+    def test_puede_bornear_false_blanco(self):
+        for i in range(18, 24):
+            self.juego.tablero.puntos[i] = 0
+        self.assertFalse(self.juego.puede_bornear(Tablero.BLANCO))
+
+    def test_jugar_turno_valido(self):
+        self.juego.tablero.puntos[0] = 1
+        self.juego.dado1.valor = 2
+        self.juego.dado2.valor = 3
+        self.juego.lanzar_dados = lambda: (2, 3)
+        self.juego.jugar_turno()
+        self.assertEqual(self.juego.turno_actual, self.juego.jugador_negro)
+
+    def test_turno_con_dobles(self):
+        self.juego.tablero.puntos[0] = 1
+        self.juego.dado1.valor = 5
+        self.juego.dado2.valor = 5
+        self.juego.lanzar_dados = lambda: (5, 5)
+        self.juego.jugar_turno()
+        movimientos = self.juego.jugador_blanco.movimientos_disponibles
+        self.assertEqual(movimientos, [5, 5, 5, 5])
+
+
+    def test_reingreso_bloqueado(self):
+        self.juego.tablero.barra[Tablero.BLANCO] = 1
+        self.juego.tablero.puntos[3] = -2  # bloqueado por negras
+        self.juego.lanzar_dados = lambda: (4, 4)
+        self.juego.jugar_turno()
+        self.assertEqual(self.juego.tablero.barra[Tablero.BLANCO], 1)  # sigue en barra
+
+
+    def test_borneo_automatico(self):
+        self.juego.tablero.puntos[18] = 1
+        self.juego.jugador_blanco.fichas_en_tablero = 1
+        self.juego.lanzar_dados = lambda: (6, 6)
+        self.juego.jugar_turno()
+        self.assertEqual(self.juego.jugador_blanco.fichas_salidas, 1)
+
+
+    def test_jugador_sin_fichas_en_tablero(self):
+        self.juego.jugador_blanco.fichas_en_tablero = 0
+        self.juego.lanzar_dados = lambda: (2, 3)
+        self.juego.jugar_turno()
+        self.assertEqual(self.juego.turno_actual, self.juego.jugador_negro)
+
+
+    def test_mover_a_destino_invalido(self):
+        self.juego.tablero.puntos[0] = 1
+        self.juego.tablero.puntos[5] = -2  # bloqueado
+        self.juego.lanzar_dados = lambda: (5, 5)
+        self.juego.jugar_turno()
+        self.assertEqual(self.juego.tablero.puntos[0], 1)  # no se movió
+
+
+    def test_cambio_turno_tras_fallo(self):
+        self.juego.tablero.puntos[0] = 1
+        self.juego.tablero.puntos[5] = -2
+        self.juego.lanzar_dados = lambda: (5, 5)
+        turno_inicial = self.juego.turno_actual
+        self.juego.jugar_turno()
+        self.assertNotEqual(self.juego.turno_actual, turno_inicial)
+
+
+
+
 if __name__ == "__main__":
     unittest.main()
