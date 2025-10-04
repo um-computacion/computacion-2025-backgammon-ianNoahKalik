@@ -290,5 +290,36 @@ class TestJuegoBackgammon(unittest.TestCase):
         self.assertEqual(self.juego.tablero.obtener_fuera(self.juego.jugador_blanco.color), 0)
 
 
+    def test_excepcion_mover_ficha_bloqueada(self):
+        self.juego.tablero.puntos[0] = 1
+        self.juego.tablero.puntos[5] = -2
+        try:
+            self.juego.tablero.mover_pieza(Tablero.BLANCO, 0, 5)
+        except Exception as e:
+            self.assertIn("bloqueado", str(e).lower())
+
+    def test_reingreso_desde_barra_exitoso(self):
+        self.juego.tablero.barra[Tablero.BLANCO] = 1
+        self.juego.tablero.puntos[3] = 0
+        self.juego.lanzar_dados = lambda: (4, 4)
+        self.juego.jugar_turno()
+        self.assertEqual(self.juego.tablero.barra[Tablero.BLANCO], 0)
+
+    def test_turno_sin_movimientos_validos(self):
+        self.juego.tablero.puntos[0] = 1
+        for i in range(1, 7):
+            self.juego.tablero.puntos[i] = -2
+        self.juego.lanzar_dados = lambda: (6, 6)
+        turno_inicial = self.juego.turno_actual
+        self.juego.jugar_turno()
+        self.assertNotEqual(self.juego.turno_actual, turno_inicial)
+
+    def test_ganador_por_fichas_fuera(self):
+        self.juego.tablero.fuera[Tablero.BLANCO] = 15
+        self.assertTrue(self.juego.juego_terminado())
+        self.assertEqual(self.juego.obtener_ganador(), self.juego.jugador_blanco)
+
+
+
 if __name__ == "__main__":
     unittest.main()
