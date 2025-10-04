@@ -109,37 +109,37 @@ class TestJuegoBackgammon(unittest.TestCase):
         self.assertEqual(movimientos, [5, 5, 5, 5])
 
 
-    def test_calcular_movimiento_blanco(self):
+    def test_calcular_movimiento_blanco_basico(self):
         self.juego.tablero.puntos[0] = 1  # ficha blanca
         origen, destino = self.juego.calcular_movimiento(Tablero.BLANCO, 3)
         self.assertEqual(origen, 0)
         self.assertEqual(destino, 3)
 
-    def test_calcular_movimiento_negro(self):
+    def test_calcular_movimiento_negro_basico(self):
         self.juego.tablero.puntos[23] = -1  # ficha negra
         origen, destino = self.juego.calcular_movimiento(Tablero.NEGRO, 4)
         self.assertEqual(origen, 23)
         self.assertEqual(destino, 19)
 
-    def test_calcular_movimiento_sin_fichas(self):
+    def test_calcular_movimiento_sin_fichas_basico(self):
         for i in range(Tablero.TOTAL_PUNTOS):
             self.juego.tablero.puntos[i] = 0
         with self.assertRaises(Exception):
             self.juego.calcular_movimiento(Tablero.BLANCO, 2)
 
-    def test_calcular_destino_reingreso_blanco(self):
+    def test_calcular_destino_reingreso_blanco_basico(self):
         destino = self.juego.calcular_destino_reingreso(Tablero.BLANCO, 5)
         self.assertEqual(destino, 4)
 
-    def test_calcular_destino_reingreso_negro(self):
+    def test_calcular_destino_reingreso_negro_basico(self):
         destino = self.juego.calcular_destino_reingreso(Tablero.NEGRO, 2)
         self.assertEqual(destino, 22)
 
-    def test_puede_bornear_true_blanco(self):
+    def test_puede_bornear_true_blanco_caso(self):
         self.juego.tablero.puntos[18] = 1
         self.assertTrue(self.juego.puede_bornear(Tablero.BLANCO))
 
-    def test_puede_bornear_false_blanco(self):
+    def test_puede_bornear_false_blanco_caso(self):
         for i in range(18, 24):
             self.juego.tablero.puntos[i] = 0
         self.assertFalse(self.juego.puede_bornear(Tablero.BLANCO))
@@ -152,7 +152,7 @@ class TestJuegoBackgammon(unittest.TestCase):
         self.juego.jugar_turno()
         self.assertEqual(self.juego.turno_actual, self.juego.jugador_negro)
 
-    def test_turno_con_dobles(self):
+    def test_turno_con_dobles_basico(self):
         self.juego.tablero.puntos[0] = 1
         self.juego.dado1.valor = 5
         self.juego.dado2.valor = 5
