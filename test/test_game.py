@@ -202,6 +202,92 @@ class TestJuegoBackgammon(unittest.TestCase):
         self.assertNotEqual(self.juego.turno_actual, turno_inicial)
 
 
+    def test_reingreso_fallido_por_bloqueo(self):
+        self.juego.tablero.barra[Tablero.BLANCO] = 1
+        self.juego.tablero.puntos[3] = -2  # bloqueado
+        self.juego.lanzar_dados = lambda: (4, 4)
+        self.juego.jugar_turno()
+        self.assertEqual(self.juego.tablero.barra[Tablero.BLANCO], 1)
+
+    def test_borneo_no_permitido_por_fichas_fuera_de_zona(self):
+        # Colocamos una ficha blanca fuera de la zona de borneo
+        self.juego.tablero.puntos[10] = 1
+        self.juego.jugador_blanco.fichas_en_tablero = 1
+
+        # Aseguramos que la zona de borneo esté vacía
+        for i in range(18, 24):
+            self.juego.tablero.puntos[i] = 0
+
+        # Dados que permitirían bornear si estuviera en zona
+        self.juego.lanzar_dados = lambda: (6, 6)
+
+        self.juego.jugar_turno()
+
+        # Verificamos que no se haya sacado ninguna ficha
+        self.assertEqual(self.juego.jugador_blanco.fichas_salidas, 0)
+
+    def test_captura_de_ficha_en_movimiento(self):
+        self.juego.tablero.puntos[0] = 1  # ficha blanca
+        self.juego.tablero.puntos[5] = -1  # ficha negra sola
+        self.juego.lanzar_dados = lambda: (5, 5)
+        self.juego.jugar_turno()
+        self.assertEqual(self.juego.tablero.barra[Tablero.NEGRO], 1)
+
+    def test_salida_de_ficha_en_borneo(self):
+        self.juego.tablero.puntos[18] = 1
+        self.juego.jugador_blanco.fichas_en_tablero = 1
+        self.juego.lanzar_dados = lambda: (6, 6)
+        self.juego.jugar_turno()
+        self.assertEqual(self.juego.jugador_blanco.fichas_salidas, 1)
+
+    def test_mover_ficha_a_destino_bloqueado(self):
+        self.juego.tablero.puntos[0] = 1
+        self.juego.tablero.puntos[5] = -2  # bloqueado
+        self.juego.lanzar_dados = lambda: (5, 5)
+        self.juego.jugar_turno()
+        self.assertEqual(self.juego.tablero.puntos[0], 1)
+
+    def test_turno_cambia_tras_movimiento_fallido(self):
+        self.juego.tablero.puntos[0] = 1
+        self.juego.tablero.puntos[5] = -2
+        self.juego.lanzar_dados = lambda: (5, 5)
+        turno_inicial = self.juego.turno_actual
+        self.juego.jugar_turno()
+        self.assertNotEqual(self.juego.turno_actual, turno_inicial)
+
+    def test_jugador_sin_fichas_en_tablero_salta_turno(self):
+        self.juego.jugador_blanco.fichas_en_tablero = 0
+        self.juego.lanzar_dados = lambda: (2, 3)
+        self.juego.jugar_turno()
+        self.assertEqual(self.juego.turno_actual, self.juego.jugador_negro)
+
+    def test_jugar_turno_con_dados_diferentes(self):
+        self.juego.tablero.puntos[0] = 1
+        self.juego.lanzar_dados = lambda: (2, 3)
+        self.juego.jugar_turno()
+        movimientos = self.juego.jugador_blanco.movimientos_disponibles
+        self.assertEqual(movimientos, [2, 3])
+
+    def test_jugar_turno_con_dobles_y_bloqueo_total(self):
+        self.juego.tablero.puntos[0] = 1
+        for i in range(1, 7):
+            self.juego.tablero.puntos[i] = -2  # todos bloqueados
+        self.juego.lanzar_dados = lambda: (6, 6)
+        self.juego.jugar_turno()
+        self.assertEqual(self.juego.tablero.puntos[0], 1)
+
+    def test_reiniciar_partida_restablece_estado(self):
+        self.juego.tablero.fuera[self.juego.jugador_blanco.color] = 15
+        self.juego.jugador_blanco.fichas_capturadas = 5
+        self.juego.jugador_blanco.fichas_salidas = 10
+        self.juego.jugador_blanco.fichas_en_tablero = 0
+        self.juego.turno_actual = self.juego.jugador_negro
+        self.juego.reiniciar_partida()
+        self.assertEqual(self.juego.jugador_blanco.fichas_capturadas, 0)
+        self.assertEqual(self.juego.jugador_blanco.fichas_salidas, 0)
+        self.assertEqual(self.juego.jugador_blanco.fichas_en_tablero, 15)
+        self.assertEqual(self.juego.turno_actual, self.juego.jugador_blanco)
+        self.assertEqual(self.juego.tablero.obtener_fuera(self.juego.jugador_blanco.color), 0)
 
 
 if __name__ == "__main__":
