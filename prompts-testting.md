@@ -53,3 +53,33 @@ Solicité ayuda para corregir el test que fallaba, asegurando que el borneo no s
 
 ---
 
+## 📝 Prompt 2
+
+**Texto exacto del prompt:**
+agregue los 10 test pero sigue en el 69%, mira: coverage report Name                    Stmts   Miss  Cover core/game.py              116     36    69%
+
+
+**Instrucciones del sistema:**
+
+Solicité ayuda para subir la cobertura de `core/game.py` con tests quirúrgicos.
+
+**Respuesta completa de la IA:**
+
+> Vamos a ejecutar directamente las líneas faltantes. Acá tenés una tanda final de tests quirúrgicos que activan ramas internas que suelen quedar sin cubrir. Pegalos dentro de tu clase `TestJuegoBackgammon`:
+>
+> - Test: excepción al mover ficha a destino bloqueado
+> - Test: reingreso desde barra exitoso
+> - Test: jugador con ficha capturada y luego reingresada
+> - Test: jugador sin movimientos válidos
+> - Test: jugador con todas las fichas fuera (ganador)
+>
+> Cada uno con código completo y explicación.
+
+**Uso de la salida:**
+
+✅ Usada con modificaciones (ajusté los puntos y dados según mi lógica)
+
+**Referencia a archivos afectados:**
+
+- `test/test_game.py`
+- `core/game.py`
