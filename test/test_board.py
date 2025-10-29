@@ -1,168 +1,149 @@
 import unittest
-from core.board import Tablero, TableroError
+from core.board import Tablero
+from core.excepciones import (
+    MovimientoInvalido,
+    PosicionFueraDeRango,
+    OrigenSinFicha,
+    DestinoBloqueado,
+    NoPuedeReingresar,
+    NoPuedeSacarFicha
+)
 
-class TestTableroInicializacion(unittest.TestCase):
-    def test_reset_inicializa_correctamente(self):
-        t = Tablero()
-        t.reset()
-        total = sum(abs(t.obtener_punto(i)) for i in range(t.TOTAL_PUNTOS))
-        self.assertEqual(total, 30)
-        self.assertEqual(t.obtener_punto(0), 2)
-        self.assertEqual(t.obtener_punto(23), -2)
+class TestTablero(unittest.TestCase):
 
-    def test_barra_inicial_vacia(self):
-        t = Tablero()
-        self.assertEqual(t.barra[t.BLANCO], 0)
-        self.assertEqual(t.barra[t.NEGRO], 0)
+    def setUp(self):
+        self.tablero = Tablero()
+        self.tablero.inicializar_piezas()
 
-    def test_borne_off_inicializado(self):
-        t = Tablero()
-        self.assertEqual(t.obtener_fuera(t.BLANCO), 0)
-        self.assertEqual(t.obtener_fuera(t.NEGRO), 0)
+    def test_inicializar_piezas_estado_correcto(self):
+        self.assertEqual(self.tablero._tablero[0], [Tablero.BLANCO] * 2)
+        self.assertEqual(self.tablero._tablero[5], [Tablero.NEGRO] * 5)
+        self.assertEqual(self.tablero._barra[Tablero.BLANCO], 0)
+        self.assertEqual(self.tablero._piezas_comidas[Tablero.NEGRO], 0)
 
-class TestTableroValidaciones(unittest.TestCase):
-    def test_obtener_punto_fuera_de_rango(self):
-        t = Tablero()
-        with self.assertRaises(TableroError):
-            t.obtener_punto(-1)
-        with self.assertRaises(TableroError):
-            t.obtener_punto(24)
+    def test_mostrar_tablero_devuelve_lista_de_24(self):
+        tablero = self.tablero.mostrar_tablero()
+        self.assertIsInstance(tablero, list)
+        self.assertEqual(len(tablero), 24)
 
-    def test_mover_pieza_jugador_invalido(self):
-        t = Tablero()
-        with self.assertRaises(TableroError):
-            t.mover_pieza(0, 0, 1)
+    def test_mostrar_tablero_visual_formato(self):
+        visual = self.tablero.mostrar_tablero_visual()
+        self.assertIsInstance(visual, str)
+        self.assertIn("🟫 Tablero de Backgammon 🟫", visual)
 
-    def test_mover_pieza_origen_sin_ficha_propia(self):
-        t = Tablero()
-        with self.assertRaises(TableroError):
-            t.mover_pieza(t.BLANCO, 5, 6)
+    def test_fichas_en_barra(self):
+        self.assertEqual(self.tablero.fichas_en_barra(Tablero.BLANCO), 0)
+        self.tablero._barra[Tablero.BLANCO] = 2
+        self.assertEqual(self.tablero.fichas_en_barra(Tablero.BLANCO), 2)
 
-class TestTableroMovimientos(unittest.TestCase):
-    def test_mover_pieza_valida_sin_captura(self):
-        t = Tablero()
-        t.puntos[0] = 1
-        t.puntos[1] = 0
-        t.mover_pieza(t.BLANCO, 0, 1)
-        self.assertEqual(t.obtener_punto(0), 0)
-        self.assertEqual(t.obtener_punto(1), 1)
+    def test_sacar_pieza_excepciones(self):
+        with self.assertRaises(PosicionFueraDeRango):
+            self.tablero.sacar_pieza(-1)
+        with self.assertRaises(PosicionFueraDeRango):
+            self.tablero.sacar_pieza(24)
+        self.tablero._tablero[3] = []
+        with self.assertRaises(OrigenSinFicha):
+            self.tablero.sacar_pieza(3)
 
-    def test_mover_pieza_con_captura(self):
-        t = Tablero()
-        t.puntos[0] = 1
-        t.puntos[1] = -1
-        t.mover_pieza(t.BLANCO, 0, 1)
-        self.assertEqual(t.obtener_punto(0), 0)
-        self.assertEqual(t.obtener_punto(1), 1)
-        self.assertEqual(t.barra[t.NEGRO], 1)
+    def test_colocar_pieza_excepciones(self):
+        with self.assertRaises(PosicionFueraDeRango):
+            self.tablero.colocar_pieza(25, Tablero.BLANCO)
 
-    def test_mover_pieza_destino_bloqueado(self):
-        t = Tablero()
-        t.puntos[0] = 1
-        t.puntos[1] = -2
-        with self.assertRaises(TableroError):
-            t.mover_pieza(t.BLANCO, 0, 1)
+    def test_mover_pieza_valida_con_captura(self):
+        self.tablero._tablero[1] = [Tablero.BLANCO]
+        self.tablero._tablero[2] = [Tablero.NEGRO]
+        self.tablero.mover_pieza(1, 2)
+        self.assertEqual(self.tablero._tablero[2], [Tablero.BLANCO])
+        self.assertEqual(self.tablero._barra[Tablero.NEGRO], 1)
+        self.assertEqual(self.tablero._piezas_comidas[Tablero.NEGRO], 1)
 
-class TestTableroReingreso(unittest.TestCase):
-    def test_hay_en_barra_true_false(self):
-        t = Tablero()
-        t.barra[t.BLANCO] = 1
-        self.assertTrue(t.hay_en_barra(t.BLANCO))
-        t.barra[t.BLANCO] = 0
-        self.assertFalse(t.hay_en_barra(t.BLANCO))
+    def test_mover_pieza_bloqueada(self):
+        self.tablero._tablero[1] = [Tablero.BLANCO]
+        self.tablero._tablero[2] = [Tablero.NEGRO, Tablero.NEGRO]
+        with self.assertRaises(DestinoBloqueado):
+            self.tablero.mover_pieza(1, 2)
 
-    def test_reingreso_valido_sin_captura(self):
-        t = Tablero()
-        t.barra[t.BLANCO] = 1
-        t.puntos[5] = 0
-        t.reingresar_desde_barra(t.BLANCO, 5)
-        self.assertEqual(t.obtener_punto(5), 1)
-        self.assertEqual(t.barra[t.BLANCO], 0)
+    def test_validar_movimiento_excepciones(self):
+        with self.assertRaises(PosicionFueraDeRango):
+            self.tablero.validar_movimiento(-1, 2, Tablero.BLANCO)
+        with self.assertRaises(OrigenSinFicha):
+            self.tablero.validar_movimiento(3, 2, Tablero.BLANCO)
+        self.tablero._tablero[4] = [Tablero.NEGRO]
+        with self.assertRaises(MovimientoInvalido):
+            self.tablero.validar_movimiento(4, 5, Tablero.BLANCO)
 
-    def test_reingreso_con_captura(self):
-        t = Tablero()
-        t.barra[t.BLANCO] = 1
-        t.puntos[5] = -1
-        t.reingresar_desde_barra(t.BLANCO, 5)
-        self.assertEqual(t.obtener_punto(5), 1)
-        self.assertEqual(t.barra[t.NEGRO], 1)
+    def test_reingresar_desde_barra_excepciones(self):
+        with self.assertRaises(PosicionFueraDeRango):
+            self.tablero.reingresar_desde_barra(Tablero.BLANCO, 24)
+        with self.assertRaises(NoPuedeReingresar):
+            self.tablero.reingresar_desde_barra(Tablero.BLANCO, 5)
+        self.tablero._barra[Tablero.BLANCO] = 1
+        self.tablero._tablero[5] = [Tablero.NEGRO, Tablero.NEGRO]
+        with self.assertRaises(DestinoBloqueado):
+            self.tablero.reingresar_desde_barra(Tablero.BLANCO, 5)
 
-    def test_reingreso_sin_fichas_en_barra(self):
-        t = Tablero()
-        with self.assertRaises(TableroError):
-            t.reingresar_desde_barra(t.BLANCO, 5)
+    def test_reingreso_valido_con_captura(self):
+        self.tablero._barra[Tablero.BLANCO] = 1
+        self.tablero._tablero[5] = [Tablero.NEGRO]
+        self.tablero.reingresar_desde_barra(Tablero.BLANCO, 5)
+        self.assertEqual(self.tablero._tablero[5], [Tablero.BLANCO])
+        self.assertEqual(self.tablero._barra[Tablero.NEGRO], 1)
 
-    def test_reingreso_en_destino_bloqueado(self):
-        t = Tablero()
-        t.barra[t.BLANCO] = 1
-        t.puntos[5] = -2
-        with self.assertRaises(TableroError):
-            t.reingresar_desde_barra(t.BLANCO, 5)
+    def test_puede_reingresar_true_y_false(self):
+        self.tablero._barra[Tablero.BLANCO] = 1
+        self.tablero._tablero[0] = []
+        self.assertTrue(self.tablero.puede_reingresar(Tablero.BLANCO, [1]))
+        self.tablero._tablero[0] = [Tablero.NEGRO, Tablero.NEGRO]
+        self.assertFalse(self.tablero.puede_reingresar(Tablero.BLANCO, [1]))
 
-class TestTableroFuera(unittest.TestCase):
-    def test_agregar_y_obtener_fuera(self):
-        t = Tablero()
-        t.agregar_a_fuera(t.BLANCO)
-        t.agregar_a_fuera(t.BLANCO)
-        self.assertEqual(t.obtener_fuera(t.BLANCO), 2)
-        self.assertEqual(t.obtener_fuera(t.NEGRO), 0)
+    def test_todas_en_home_true_y_false(self):
+        self.tablero._tablero = [[] for _ in range(24)]
+        self.tablero._tablero[18] = [Tablero.BLANCO]
+        self.assertTrue(self.tablero.todas_en_home(Tablero.BLANCO))
+        self.tablero._tablero[10] = [Tablero.BLANCO]
+        self.assertFalse(self.tablero.todas_en_home(Tablero.BLANCO))
+        self.tablero._barra[Tablero.BLANCO] = 1
+        self.assertFalse(self.tablero.todas_en_home(Tablero.BLANCO))
 
-if __name__ == "_main_":
-    unittest.main()
+    def test_sacar_ficha_fuera_excepciones(self):
+        with self.assertRaises(PosicionFueraDeRango):
+            self.tablero.sacar_ficha_fuera(Tablero.BLANCO, -1)
+        with self.assertRaises(OrigenSinFicha):
+            self.tablero.sacar_ficha_fuera(Tablero.BLANCO, 3)
+        self.tablero._tablero[18] = [Tablero.NEGRO]
+        with self.assertRaises(MovimientoInvalido):
+            self.tablero.sacar_ficha_fuera(Tablero.BLANCO, 18)
+        self.tablero._tablero[10] = [Tablero.BLANCO]
+        with self.assertRaises(NoPuedeSacarFicha):
+            self.tablero.sacar_ficha_fuera(Tablero.BLANCO, 10)
 
+    def test_sacar_ficha_fuera_valida(self):
+        self.tablero._tablero = [[] for _ in range(24)]
+        self.tablero._tablero[18] = [Tablero.BLANCO]
+        self.assertTrue(self.tablero.sacar_ficha_fuera(Tablero.BLANCO, 18))
+        self.assertEqual(self.tablero._tablero[18], [])
 
+    def test_validar_movimiento_valido(self):
+        self.tablero._tablero[1] = [Tablero.BLANCO]
+        self.tablero._tablero[2] = []
+        resultado = self.tablero.validar_movimiento(1, 2, Tablero.BLANCO)
+        self.assertTrue(resultado)
 
+    def test_reingresar_desde_barra_exito_sin_captura(self):
+        self.tablero._barra[Tablero.BLANCO] = 1
+        self.tablero._tablero[3] = []
+        resultado = self.tablero.reingresar_desde_barra(Tablero.BLANCO, 3)
+        self.assertTrue(resultado)
+        self.assertEqual(self.tablero._barra[Tablero.BLANCO], 0)
+        self.assertEqual(self.tablero._tablero[3], [Tablero.BLANCO])
 
-
-
-
-
-
-class TestTableroCoberturaExtra(unittest.TestCase):
-    def test_validar_jugador_invalido_directamente(self):
-        t = Tablero()
-        with self.assertRaises(TableroError):
-            t._validar_jugador(99)
-
-    def test_punto_disponible_ocupacion_vacia(self):
-        t = Tablero()
-        t.puntos[3] = 0
-        self.assertTrue(t.punto_disponible(3, t.BLANCO))
-
-    def test_punto_disponible_ocupado_por_mismo_color(self):
-        t = Tablero()
-        t.puntos[4] = 2 * t.BLANCO
-        self.assertTrue(t.punto_disponible(4, t.BLANCO))
-
-    def test_punto_disponible_con_un_enemigo(self):
-        t = Tablero()
-        t.puntos[5] = -1
-        self.assertTrue(t.punto_disponible(5, t.BLANCO))
-
-    def test_punto_disponible_bloqueado_por_2_enemigos(self):
-        t = Tablero()
-        t.puntos[6] = -2
-        self.assertFalse(t.punto_disponible(6, t.BLANCO))
-
-
-class TestTableroErroresFaltantes(unittest.TestCase):
-    def test_mover_pieza_destino_fuera_de_rango(self):
-        t = Tablero()
-        t.puntos[0] = 1
-        with self.assertRaises(TableroError):
-            t.mover_pieza(t.BLANCO, 0, 24)
-
-    def test_reingresar_destino_fuera_de_rango(self):
-        t = Tablero()
-        t.barra[t.BLANCO] = 1
-        with self.assertRaises(TableroError):
-            t.reingresar_desde_barra(t.BLANCO, -1)
-
-    def test_mover_pieza_sin_ficha_propia_en_origen(self):
-        t = Tablero()
-        t.puntos[0] = -1  # ficha enemiga
-        with self.assertRaises(TableroError):
-            t.mover_pieza(t.BLANCO, 0, 1)
+    def test_sacar_ficha_fuera_exito(self):
+        self.tablero._tablero = [[] for _ in range(24)]
+        self.tablero._tablero[18] = [Tablero.BLANCO]
+        self.assertTrue(self.tablero.todas_en_home(Tablero.BLANCO))
+        resultado = self.tablero.sacar_ficha_fuera(Tablero.BLANCO, 18)
+        self.assertTrue(resultado)
+        self.assertEqual(self.tablero._tablero[18], [])
 
 if __name__ == "__main__":
     unittest.main()

@@ -68,13 +68,17 @@ class JuegoBackgammon:
         for origen in puntos:
             try:
                 punto = self.tablero.mostrar_tablero()[origen]
-                if punto and punto[-1] == color:
-                    destino = origen + movimiento if color == Tablero.BLANCO else origen - movimiento
-                    if 0 <= destino < 24:
-                        return origen, destino
+                if not punto or punto[-1] != color:
+                    continue
+                    
+                destino = origen + movimiento if color == Tablero.BLANCO else origen - movimiento
+                if 0 <= destino < 24:
+                    return origen, destino
+
             except (PosicionFueraDeRango, OrigenSinFicha):
                 continue
         raise MovimientoInvalido("No se encontró movimiento válido para el jugador.")
+        
 
     def puede_bornear(self, color):
         extremos = range(18, 24) if color == Tablero.BLANCO else range(0, 6)
