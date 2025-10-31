@@ -16,8 +16,8 @@ class JuegoBackgammon:
             raise ValueError("Los nombres de los jugadores no pueden estar vacíos.")
         self.tablero = Tablero()
         self.tablero.inicializar_piezas()
-        self.jugador_blanco = Jugador(nombre_blanco, Tablero.BLANCO)
-        self.jugador_negro = Jugador(nombre_negro, Tablero.NEGRO)
+        self.jugador_blanco = Jugador(nombre_blanco, Tablero.NEGRO)
+        self.jugador_negro = Jugador(nombre_negro, Tablero.BLANCO)
         self.dado1 = Dado()
         self.dado2 = Dado()
         self.turno_actual = self.jugador_blanco

@@ -15,6 +15,7 @@ class Tablero:
         self._tablero = [[] for _ in range(24)]
         self._piezas_comidas = {self.BLANCO: 0, self.NEGRO: 0}
         self._barra = {self.BLANCO: 0, self.NEGRO: 0}
+        self._fichas_fuera = {self.BLANCO: 0, self.NEGRO: 0}  # ✅ agregado
 
     def inicializar_piezas(self):
         self._tablero = [[] for _ in range(24)]
@@ -28,6 +29,7 @@ class Tablero:
         self._tablero[23] = [self.NEGRO] * 2
         self._barra = {self.BLANCO: 0, self.NEGRO: 0}
         self._piezas_comidas = {self.BLANCO: 0, self.NEGRO: 0}
+        self._fichas_fuera = {self.BLANCO: 0, self.NEGRO: 0}  # ✅ reinicializado
 
     def mostrar_tablero(self):
         return self._tablero
@@ -144,4 +146,8 @@ class Tablero:
         if not self.todas_en_home(color):
             raise NoPuedeSacarFicha(f"No se puede sacar fichas: no todas las fichas de {color} están en el home.")
         self._tablero[origen].pop()
+        self._fichas_fuera[color] += 1  # ✅ agregado
         return True
+
+    def fichas_fuera(self, color: str):  # ✅ agregado
+        return self._fichas_fuera[color]
