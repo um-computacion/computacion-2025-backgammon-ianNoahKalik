@@ -6,6 +6,7 @@ from core.excepciones import (
     NoPuedeReingresar,
     NoPuedeSacarFicha
 )
+from core.checker import Ficha
 
 class Tablero:
     BLANCO = "Blancas"
@@ -14,22 +15,22 @@ class Tablero:
     def __init__(self):
         self._tablero = [[] for _ in range(24)]
         self._piezas_comidas = {self.BLANCO: 0, self.NEGRO: 0}
-        self._barra = {self.BLANCO: 0, self.NEGRO: 0}
-        self._fichas_fuera = {self.BLANCO: 0, self.NEGRO: 0}  # ✅ agregado
+        self._barra = {self.BLANCO: [], self.NEGRO: []}
+        self._fichas_fuera = {self.BLANCO: [], self.NEGRO: []}
 
     def inicializar_piezas(self):
         self._tablero = [[] for _ in range(24)]
-        self._tablero[0] = [self.BLANCO] * 2
-        self._tablero[5] = [self.NEGRO] * 5
-        self._tablero[7] = [self.NEGRO] * 3
-        self._tablero[11] = [self.BLANCO] * 5
-        self._tablero[12] = [self.NEGRO] * 5
-        self._tablero[16] = [self.BLANCO] * 3
-        self._tablero[18] = [self.BLANCO] * 5
-        self._tablero[23] = [self.NEGRO] * 2
-        self._barra = {self.BLANCO: 0, self.NEGRO: 0}
+        self._tablero[0] = [Ficha(1) for _ in range(2)]
+        self._tablero[5] = [Ficha(-1) for _ in range(5)]
+        self._tablero[7] = [Ficha(-1) for _ in range(3)]
+        self._tablero[11] = [Ficha(1) for _ in range(5)]
+        self._tablero[12] = [Ficha(-1) for _ in range(5)]
+        self._tablero[16] = [Ficha(1) for _ in range(3)]
+        self._tablero[18] = [Ficha(1) for _ in range(5)]
+        self._tablero[23] = [Ficha(-1) for _ in range(2)]
+        self._barra = {self.BLANCO: [], self.NEGRO: []}
         self._piezas_comidas = {self.BLANCO: 0, self.NEGRO: 0}
-        self._fichas_fuera = {self.BLANCO: 0, self.NEGRO: 0}  # ✅ reinicializado
+        self._fichas_fuera = {self.BLANCO: [], self.NEGRO: []}
 
     def mostrar_tablero(self):
         return self._tablero
@@ -39,12 +40,12 @@ class Tablero:
         visual += "↘️ Puntos 12 a 1 (lado superior)\n"
         for i in reversed(range(12)):
             punto = self._tablero[i]
-            contenido = "".join("⚪" if ficha == self.BLANCO else "⚫" for ficha in punto)
+            contenido = "".join("⚪" if ficha.es_blanca() else "⚫" for ficha in punto)
             visual += f"{i:02d}: {contenido:<6}  "
         visual += "\n\n↗️ Puntos 13 a 24 (lado inferior)\n"
         for i in range(12, 24):
             punto = self._tablero[i]
-            contenido = "".join("⚪" if ficha == self.BLANCO else "⚫" for ficha in punto)
+            contenido = "".join("⚪" if ficha.es_blanca() else "⚫" for ficha in punto)
             visual += f"{i:02d}: {contenido:<6}  "
         visual += "\n"
         return visual
@@ -53,7 +54,10 @@ class Tablero:
         return self._piezas_comidas
 
     def fichas_en_barra(self, color: str):
-        return self._barra[color]
+        return len(self._barra[color])
+
+    def fichas_fuera(self, color: str):
+        return self._fichas_fuera[color]
 
     def sacar_pieza(self, posicion: int):
         if posicion < 0 or posicion > 23:
@@ -63,37 +67,41 @@ class Tablero:
         else:
             raise OrigenSinFicha(f"No hay fichas en la posición {posicion}.")
 
-    def colocar_pieza(self, posicion: int, color: str):
+    def colocar_pieza(self, posicion: int, ficha: Ficha):
         if posicion < 0 or posicion > 23:
             raise PosicionFueraDeRango(f"La posición {posicion} está fuera del tablero (0-23).")
-        self._tablero[posicion].append(color)
+        self._tablero[posicion].append(ficha)
 
     def mover_pieza(self, origen: int, destino: int):
         if not self._tablero[origen]:
             raise OrigenSinFicha(f"No hay fichas en la posición {origen}.")
-        color = self._tablero[origen][-1]
+        ficha = self._tablero[origen][-1]
+        color = self.BLANCO if ficha.es_blanca() else self.NEGRO
         self.validar_movimiento(origen, destino, color)
 
-        pieza = self.sacar_pieza(origen)
+        ficha = self.sacar_pieza(origen)
 
         if (self._tablero[destino] and
-            self._tablero[destino][-1] != color and
+            self._tablero[destino][-1].color != ficha.color and
             len(self._tablero[destino]) == 1):
-            color_comido = self._tablero[destino].pop()
+            ficha_comida = self._tablero[destino].pop()
+            ficha_comida.capturar()
+            color_comido = self.BLANCO if ficha_comida.es_blanca() else self.NEGRO
             self._piezas_comidas[color_comido] += 1
-            self._barra[color_comido] += 1
+            self._barra[color_comido].append(ficha_comida)
 
-        self.colocar_pieza(destino, pieza)
+        self.colocar_pieza(destino, ficha)
 
     def validar_movimiento(self, origen: int, destino: int, color: str):
         if origen < 0 or origen > 23 or destino < 0 or destino > 23:
             raise PosicionFueraDeRango("Las posiciones deben estar entre 0 y 23.")
         if not self._tablero[origen]:
             raise OrigenSinFicha(f"No hay fichas en la posición {origen}.")
-        if self._tablero[origen][-1] != color:
+        ficha = self._tablero[origen][-1]
+        if (color == self.BLANCO and not ficha.es_blanca()) or (color == self.NEGRO and not ficha.es_negra()):
             raise MovimientoInvalido(f"La ficha en posición {origen} no pertenece al jugador {color}.")
         if (self._tablero[destino] and
-            self._tablero[destino][-1] != color and
+            self._tablero[destino][-1].color != ficha.color and
             len(self._tablero[destino]) > 1):
             raise DestinoBloqueado(f"La posición {destino} está bloqueada por fichas enemigas.")
         return True
@@ -101,30 +109,32 @@ class Tablero:
     def reingresar_desde_barra(self, color: str, destino: int):
         if destino < 0 or destino > 23:
             raise PosicionFueraDeRango(f"La posición {destino} está fuera del tablero (0-23).")
-        if self._barra[color] <= 0:
+        if not self._barra[color]:
             raise NoPuedeReingresar(f"No hay fichas de color {color} en la barra para reingresar.")
+        ficha = self._barra[color].pop()
         if (self._tablero[destino] and
-            self._tablero[destino][-1] != color and
+            self._tablero[destino][-1].color != ficha.color and
             len(self._tablero[destino]) > 1):
             raise DestinoBloqueado(f"No se puede reingresar en posición {destino}: está bloqueada.")
         if (self._tablero[destino] and
-            self._tablero[destino][-1] != color and
+            self._tablero[destino][-1].color != ficha.color and
             len(self._tablero[destino]) == 1):
-            color_comido = self._tablero[destino].pop()
+            ficha_comida = self._tablero[destino].pop()
+            ficha_comida.capturar()
+            color_comido = self.BLANCO if ficha_comida.es_blanca() else self.NEGRO
             self._piezas_comidas[color_comido] += 1
-            self._barra[color_comido] += 1
-        self._tablero[destino].append(color)
-        self._barra[color] -= 1
+            self._barra[color_comido].append(ficha_comida)
+        self._tablero[destino].append(ficha)
         return True
 
     def puede_reingresar(self, color: str, dados: list):
-        if self._barra[color] == 0:
+        if not self._barra[color]:
             return False
         posiciones = [dado - 1 if color == self.BLANCO else 24 - dado for dado in dados]
         for pos in posiciones:
             if 0 <= pos <= 23:
                 if (not self._tablero[pos] or
-                    self._tablero[pos][-1] == color or
+                    self._tablero[pos][-1].color == (1 if color == self.BLANCO else -1) or
                     len(self._tablero[pos]) == 1):
                     return True
         return False
@@ -132,22 +142,25 @@ class Tablero:
     def todas_en_home(self, color: str):
         home = range(18, 24) if color == self.BLANCO else range(0, 6)
         for i, punto in enumerate(self._tablero):
-            if punto and punto[0] == color and i not in home:
+            if punto and ((color == self.BLANCO and punto[0].es_blanca()) or
+                          (color == self.NEGRO and punto[0].es_negra())) and i not in home:
                 return False
-        return self._barra[color] == 0
+        return not self._barra[color]
 
     def sacar_ficha_fuera(self, color: str, origen: int):
         if origen < 0 or origen > 23:
             raise PosicionFueraDeRango(f"La posición {origen} está fuera del tablero (0-23).")
         if not self._tablero[origen]:
             raise OrigenSinFicha(f"No hay fichas en la posición {origen} para sacar.")
-        if self._tablero[origen][-1] != color:
+    
+        ficha = self._tablero[origen][-1]
+    
+        if (color == self.BLANCO and not ficha.es_blanca()) or (color == self.NEGRO and not ficha.es_negra()):
             raise MovimientoInvalido(f"La ficha en posición {origen} no pertenece al jugador {color}.")
+    
         if not self.todas_en_home(color):
             raise NoPuedeSacarFicha(f"No se puede sacar fichas: no todas las fichas de {color} están en el home.")
-        self._tablero[origen].pop()
-        self._fichas_fuera[color] += 1  # ✅ agregado
+    
+        ficha = self._tablero[origen].pop()
+        self._fichas_fuera[color].append(ficha)
         return True
-
-    def fichas_fuera(self, color: str):  # ✅ agregado
-        return self._fichas_fuera[color]
