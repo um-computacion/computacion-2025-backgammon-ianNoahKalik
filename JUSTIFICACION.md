@@ -4,7 +4,7 @@ Este documento acompaña el desarrollo del sistema Backgammon, detallando las de
 
 ---
 
-## 🧩 Resumen del Diseño General
+##  Resumen del Diseño General
 
 El sistema se estructura en tres capas principales:
 
@@ -16,7 +16,7 @@ La arquitectura prioriza modularidad, trazabilidad, robustez ante errores y sepa
 
 ---
 
-## 🧱 Justificación de Clases
+##  Justificación de Clases
 
 - **`Ficha`**: representa una ficha individual, con color y estado de captura. Permite trazabilidad y operaciones como `capturar()` y `liberar()`.
 - **`Dado`**: encapsula el comportamiento de lanzamiento, obtención y reinicio. Evita errores de flujo y permite testing aislado.
@@ -28,7 +28,7 @@ La arquitectura prioriza modularidad, trazabilidad, robustez ante errores y sepa
 
 ---
 
-## 🧬 Justificación de Atributos
+##  Justificación de Atributos
 
 - `color_numerico`: permite cálculos direccionales sin condicionales complejos.
 - `_tablero`: lista de 24 puntos con pilas de fichas, permite operaciones tipo stack (`pop`, `append`).
@@ -38,7 +38,7 @@ La arquitectura prioriza modularidad, trazabilidad, robustez ante errores y sepa
 
 ---
 
-## 🧠 Decisiones de Diseño Relevantes
+##  Decisiones de Diseño Relevantes
 
 - Separación entre lógica (`core`) y visualización (`pygame_ui`) mediante adaptadores.
 - Uso de excepciones específicas para representar errores del dominio y evitar `ValueError` genéricos.
@@ -48,7 +48,7 @@ La arquitectura prioriza modularidad, trazabilidad, robustez ante errores y sepa
 
 ---
 
-## 🚨 Excepciones y Manejo de Errores
+##  Excepciones y Manejo de Errores
 
 Se definieron excepciones específicas en `core/excepciones.py`:
 
@@ -63,7 +63,7 @@ Estas excepciones permiten testing quirúrgico, mensajes claros y robustez ante 
 
 ---
 
-## 🧪 Estrategias de Testing y Cobertura
+##  Estrategias de Testing y Cobertura
 
 Se implementaron tests unitarios con `unittest` en la carpeta `test/`, cubriendo todos los módulos:
 
@@ -85,7 +85,7 @@ Se utiliza `coverage` para asegurar que cada rama de código esté cubierta. Se 
 
 ---
 
-## 🧱 Referencias a Principios SOLID
+##  Referencias a Principios SOLID
 
 - **S (Single Responsibility)**: cada clase tiene una única responsabilidad clara (ej. `Ficha`, `Dado`, `Jugador`, `Tablero`).
 - **O (Open/Closed)**: el sistema permite agregar nuevas reglas o modos sin modificar las clases existentes (ej. modo gráfico).
@@ -95,14 +95,14 @@ Se utiliza `coverage` para asegurar que cada rama de código esté cubierta. Se 
 
 ---
 
-## 📐 Anexos
+##  Anexos
 
 ### Diagrama de Clases (UML)
 
 
 ---
 
-## 🔄 Evolución del Diseño
+##  Evolución del Diseño
 
 - Se refactorizó `Tablero` para blindar cada método con excepciones específicas.
 - Se modularizó la experiencia visual separando `pantalla_inicio` y `main_juego`.
