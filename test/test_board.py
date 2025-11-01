@@ -29,7 +29,7 @@ class TestTablero(unittest.TestCase):
     def test_mostrar_tablero_visual_formato(self):
         visual = self.tablero.mostrar_tablero_visual()
         self.assertIsInstance(visual, str)
-        self.assertIn("🟫 Tablero de Backgammon 🟫", visual)
+        self.assertIn(" Tablero de Backgammon ", visual)
 
     def test_fichas_en_barra(self):
         self.assertEqual(self.tablero.fichas_en_barra(Tablero.BLANCO), 0)

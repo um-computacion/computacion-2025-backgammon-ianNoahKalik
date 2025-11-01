@@ -4,7 +4,7 @@ class Jugador:
     def __init__(self, nombre: str, color: str):
         self.nombre = nombre
         self.color = color  # "Blancas" o "Negras"
-        self.color_numerico = 1 if color == "Blancas" else -1  # ✅ agregado
+        self.color_numerico = 1 if color == "Blancas" else -1  #  agregado
         self.dado = Dado()
         self.fichas_capturadas = 0
         self.fichas_salidas = 0

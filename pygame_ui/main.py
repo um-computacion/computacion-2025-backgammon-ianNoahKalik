@@ -38,7 +38,7 @@ def pantalla_inicio(screen, font_titulo, font_texto):
                         print(f"[Inicio] Jugador Blanco: {texto_blanco.strip()} | Jugador Negro: {texto_negro.strip()}")
                         return texto_blanco.strip(), texto_negro.strip()
                     else:
-                        mensaje_error = "⚠️ Completá ambos nombres antes de comenzar"
+                        mensaje_error = " Completá ambos nombres antes de comenzar"
 
             elif event.type == pygame.KEYDOWN:
                 if active_blanco:
