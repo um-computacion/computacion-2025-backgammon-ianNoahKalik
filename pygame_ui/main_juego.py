@@ -152,7 +152,7 @@ def ejecutar_juego(screen, font, nombre1, nombre2):
         render_fuera(screen, font, juego.tablero.fichas_fuera("Blancas"), juego.tablero.fichas_fuera("Negras"))
 
         if mostrar_bloqueo:
-            txt_bloqueo = font.render("⛔ Debés reingresar antes de mover otras fichas", True, (200, 0, 0))
+            txt_bloqueo = font.render("Debés reingresar antes de mover otras fichas", True, (200, 0, 0))
             screen.blit(txt_bloqueo, (40, 110))
 
         pygame.display.flip()

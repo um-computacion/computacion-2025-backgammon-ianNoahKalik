@@ -4,7 +4,7 @@ from core.game import JuegoBackgammon
 
 def main():
     parser = argparse.ArgumentParser(
-        description="🎲 Backgammon CLI - Ejecutá el juego desde consola"
+        description=" Backgammon CLI - Ejecutá el juego desde consola"
     )
     parser.add_argument("--modo", choices=["interactivo", "simulado", "grafico"], default="interactivo",
                         help="Modo de juego: interactivo, simulado o grafico")
@@ -12,8 +12,8 @@ def main():
     parser.add_argument("--jugador2", default="Jugador 2", help="Nombre del jugador negro")
     args = parser.parse_args()
 
-    print(f"\n🧠 Iniciando Backgammon en modo: {args.modo.upper()}")
-    print(f"👤 Blanco: {args.jugador1} | ⚫ Negro: {args.jugador2}\n")
+    print(f"\n Iniciando Backgammon en modo: {args.modo.upper()}")
+    print(f" Blanco: {args.jugador1} |  Negro: {args.jugador2}\n")
 
     juego = JuegoBackgammon(args.jugador1, args.jugador2)
 
@@ -22,7 +22,7 @@ def main():
     elif args.modo == "simulado":
         juego.simular_partida()
     elif args.modo == "grafico":
-        print("🚧 Modo gráfico aún no implementado.")
+        print(" Modo gráfico aún no implementado.")
         # iniciar_interfaz(juego)
 
 if __name__ == "__main__":

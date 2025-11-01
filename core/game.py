@@ -91,7 +91,7 @@ class JuegoBackgammon:
     def jugar_partida_interactiva(self):
         while not self.juego_terminado():
             jugador = self.obtener_jugador_actual()
-            print(f"\n🎯 Turno de {jugador.nombre} ({'Blanco' if jugador.color == Tablero.BLANCO else 'Negro'})")
+            print(f"\n Turno de {jugador.nombre} ({'Blanco' if jugador.color == Tablero.BLANCO else 'Negro'})")
             input("Presioná Enter para lanzar los dados...")
             dado1, dado2 = self.lanzar_dados()
             print(f"{jugador.nombre} lanzó: {dado1} y {dado2}")
@@ -100,7 +100,7 @@ class JuegoBackgammon:
             jugador.movimientos_disponibles = movimientos
 
             for movimiento in movimientos:
-                print(f"\n➡️ Movimiento disponible: {movimiento}")
+                print(f"\n Movimiento disponible: {movimiento}")
                 print(self.tablero.mostrar_tablero_visual())
 
                 movimiento_realizado = False
@@ -116,7 +116,7 @@ class JuegoBackgammon:
                             print(f"{jugador.nombre} reingresó una ficha al punto {destino}")
                             movimiento_realizado = True
                         except (ValueError, PosicionFueraDeRango, OrigenSinFicha, DestinoBloqueado, NoPuedeReingresar) as e:
-                            print(f"⚠️ Error al reingresar: {e}")
+                            print(f" Error al reingresar: {e}")
                     else:
                         try:
                             origen = int(input("Elegí punto de origen: "))
@@ -131,23 +131,23 @@ class JuegoBackgammon:
                                         self.tablero.sacar_ficha_fuera(jugador.color, destino)
                                         jugador.sacar_ficha()
                                     except NoPuedeSacarFicha as e:
-                                        print(f"⚠️ No se pudo sacar ficha: {e}")
+                                        print(f" No se pudo sacar ficha: {e}")
                             movimiento_realizado = True
                         except (ValueError, PosicionFueraDeRango, OrigenSinFicha, DestinoBloqueado, MovimientoInvalido) as e:
-                            print(f"⚠️ Movimiento inválido: {e}")
+                            print(f" Movimiento inválido: {e}")
 
                 if not movimiento_realizado:
-                    print(f"⏭️ No se pudo realizar el movimiento {movimiento}. Se pierde ese dado.")
+                    print(f"⏭ No se pudo realizar el movimiento {movimiento}. Se pierde ese dado.")
 
             self.cambiar_turno()
 
         ganador = self.obtener_ganador()
-        print(f"\n🏁 ¡{ganador.nombre} ha ganado la partida!")
+        print(f"\n ¡{ganador.nombre} ha ganado la partida!")
 
     def simular_partida(self):
         while not self.juego_terminado():
             jugador = self.obtener_jugador_actual()
-            print(f"\n🎯 Turno de {jugador.nombre} ({'Blanco' if jugador.color == Tablero.BLANCO else 'Negro'})")
+            print(f"\n Turno de {jugador.nombre} ({'Blanco' if jugador.color == Tablero.BLANCO else 'Negro'})")
             dado1, dado2 = self.lanzar_dados()
             print(f"{jugador.nombre} lanzó: {dado1} y {dado2}")
 
@@ -155,7 +155,7 @@ class JuegoBackgammon:
             jugador.movimientos_disponibles = movimientos
 
             for movimiento in movimientos:
-                print(f"\n➡️ Movimiento automático: {movimiento}")
+                print(f"\n Movimiento automático: {movimiento}")
                 print(self.tablero.mostrar_tablero_visual())
 
                 if self.tablero.fichas_en_barra(jugador.color):
@@ -164,7 +164,7 @@ class JuegoBackgammon:
                         self.tablero.reingresar_desde_barra(jugador.color, destino)
                         print(f"{jugador.nombre} reingresó una ficha al punto {destino}")
                     except Exception as e:
-                        print(f"⚠️ Error al reingresar: {e}")
+                        print(f" Error al reingresar: {e}")
                     continue
 
                 try:
@@ -179,17 +179,17 @@ class JuegoBackgammon:
                                 self.tablero.sacar_ficha_fuera(jugador.color, destino)
                                 jugador.sacar_ficha()
                             except Exception as e:
-                                print(f"⚠️ No se pudo sacar ficha: {e}")
+                                print(f" No se pudo sacar ficha: {e}")
                 except Exception as e:
-                    print(f"⚠️ Movimiento inválido: {e}")
+                    print(f" Movimiento inválido: {e}")
 
             self.cambiar_turno()
 
         ganador = self.obtener_ganador()
-        print(f"\n🏁 ¡{ganador.nombre} ha ganado la partida!")
+        print(f"\n ¡{ganador.nombre} ha ganado la partida!")
 
 if __name__ == "__main__":
-    print("🎲 Bienvenido a Backgammon")
+    print("Bienvenido a Backgammon")
     print("Seleccioná el modo de juego:")
     print("1. Modo interactivo (jugás vos)")
     print("2. Modo automático (simulación completa)")
@@ -205,4 +205,4 @@ if __name__ == "__main__":
         juego = JuegoBackgammon("Jugador 1", "Jugador 2")
         juego.simular_partida()
     else:
-        print("❌ Opción inválida. Cerrando el juego.")
+        print(" Opción inválida. Cerrando el juego.")

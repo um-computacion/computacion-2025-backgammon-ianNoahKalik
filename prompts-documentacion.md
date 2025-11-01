@@ -1,4 +1,4 @@
-# 📝 Prompts utilizados para documentación del proyecto
+#  Prompts utilizados para documentación del proyecto
 
 Este archivo registra los intercambios con herramientas de IA utilizados para redactar la documentación del sistema Backgammon. La IA fue utilizada como asistente técnico para generar archivos explicativos, estructurar contenidos y presentar el proyecto de forma profesional.
 

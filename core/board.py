@@ -36,13 +36,13 @@ class Tablero:
         return self._tablero
 
     def mostrar_tablero_visual(self):
-        visual = "\n🟫 Tablero de Backgammon 🟫\n\n"
-        visual += "↘️ Puntos 12 a 1 (lado superior)\n"
+        visual = "\n Tablero de Backgammon \n\n"
+        visual += "↘ Puntos 12 a 1 (lado superior)\n"
         for i in reversed(range(12)):
             punto = self._tablero[i]
             contenido = "".join("⚪" if ficha.es_blanca() else "⚫" for ficha in punto)
             visual += f"{i:02d}: {contenido:<6}  "
-        visual += "\n\n↗️ Puntos 13 a 24 (lado inferior)\n"
+        visual += "\n\n↗ Puntos 13 a 24 (lado inferior)\n"
         for i in range(12, 24):
             punto = self._tablero[i]
             contenido = "".join("⚪" if ficha.es_blanca() else "⚫" for ficha in punto)
